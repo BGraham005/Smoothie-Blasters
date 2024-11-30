@@ -27,7 +27,7 @@ public class CamManager : MonoBehaviour
     private void Update()
     {
         camRotation.Yaw += MousePos.x*mouseSense.x*Time.deltaTime;
-        camRotation.Pitch += MousePos.y*mouseSense.y*Time.deltaTime;
+        camRotation.Pitch += MousePos.y*mouseSense.y*Time.deltaTime*-1f;
         camRotation.Pitch = Mathf.Clamp(camRotation.Pitch,camAngle.min,camAngle.max);
     }
 
