@@ -1,6 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using Mono.Cecil.Cil;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -14,7 +11,12 @@ public class LedgeGrab : MonoBehaviour
         {
             player = other.GameObject();
             script = player.GetComponent<CharControl>();
-            script.GrabbingLedge = true;
+            if (script.GrabbingLedge == false && script.JumpingFromLedge == false)
+            {
+                script.GrabbingLedge = true;
+                script.LedgeDir = transform.rotation * Vector3.forward;
+                script.LedgePos = transform.position - (script.LedgeDir/2);
+            }
         }
     }
 }

@@ -1,7 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -10,7 +7,7 @@ public class CamManager : MonoBehaviour
     [SerializeField] private Transform target;
     private float CamOffset;
     private Vector2 MousePos;
-    [SerializeField] private MouseSensitivity mouseSense;
+    public MouseSensitivity mouseSense;
     private CameraRotation camRotation;
     [SerializeField] private CameraAngle camAngle;
 
@@ -38,7 +35,6 @@ public class CamManager : MonoBehaviour
     }
 }
 
-[Serializable]
 public struct MouseSensitivity
 {
     public float x;
