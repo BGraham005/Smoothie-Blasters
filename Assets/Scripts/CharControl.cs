@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -16,6 +17,7 @@ public class CharControl : MonoBehaviour
     private Camera mainCamera;
     public UnityEngine.Vector3 DashDir;
     public float DashSpeed;
+    public float DashGroundSpeed;
     public bool DashState = false;
     public float DashTime;
     public bool GrabbingLedge = false;
@@ -26,6 +28,7 @@ public class CharControl : MonoBehaviour
     public UnityEngine.Vector3 KnockbackDir;
     [SerializeField] private float KnockStrength;
     [SerializeField] private float InvTime;
+    [SerializeField] private MeshRenderer MyMeshVisibility;
 
     void Start()
     {
@@ -111,7 +114,7 @@ public class CharControl : MonoBehaviour
     public void Dash(InputAction.CallbackContext context)
     {
         if (!context.started || Time.timeScale < 1f) return;
-        if (DashState == true) return;
+        if (DashState == true || GrabbingLedge == true) return;
         DashState = true;
 
         float targetAngle = Mathf.Atan2(ControlInput.x,ControlInput.y) * Mathf.Rad2Deg + mainCamera.transform.eulerAngles.y;
@@ -121,14 +124,25 @@ public class CharControl : MonoBehaviour
     private IEnumerator DashCoroutine()
     {
         float startTime = Time.time;
-        while(Time.time < startTime + DashTime)
+        while(Time.time < startTime + DashTime && GrabbingLedge == false)
         {
-            characterController.Move(new UnityEngine.Vector3(transform.forward.x,transform.forward.y+0.25f,transform.forward.z) * DashSpeed * Time.deltaTime);
+            if (!characterController.isGrounded)
+            {
+                characterController.Move
+                (new UnityEngine.Vector3(transform.forward.x,transform.forward.y+0.125f,transform.forward.z)
+                * DashSpeed * Time.deltaTime);
+            }
+            else
+            {
+                characterController.Move
+                (new UnityEngine.Vector3(transform.forward.x,transform.forward.y,transform.forward.z)
+                * DashGroundSpeed * Time.deltaTime);
+            }
             yield return null; // this will make Unity stop here and continue next frame
         }
         DashState = false;
     }
-    public void DashWait()
+    /*public void DashWait()
     {
         DashState = true;
         StartCoroutine(MenuCooldown());
@@ -138,11 +152,11 @@ public class CharControl : MonoBehaviour
         yield return new WaitForSeconds(0.25f);
         DashState = false;
         yield return null;
-    }
+    }*/
 
     private IEnumerator JumpFromLedge()
     {
-        yield return new WaitForSeconds(1);
+        yield return new WaitForSeconds(0.6f);
         JumpingFromLedge = false;
         yield return null;
     }
@@ -153,9 +167,30 @@ public class CharControl : MonoBehaviour
         while(Time.time < startTime + InvTime/6)
         {
             characterController.Move(KnockbackDir*Time.deltaTime*KnockStrength);
+            if (MyMeshVisibility.forceRenderingOff == true)
+            {
+                MyMeshVisibility.forceRenderingOff = false;
+            }
+            else
+            {
+                MyMeshVisibility.forceRenderingOff = true;
+            }
             yield return null;
         }
-        yield return new WaitForSeconds((InvTime*5)/6);
+        while(Time.time < startTime + (InvTime*5)/6)
+        {
+            if (MyMeshVisibility.forceRenderingOff == true)
+            {
+                MyMeshVisibility.forceRenderingOff = false;
+            }
+            else
+            {
+                MyMeshVisibility.forceRenderingOff = true;
+            }
+            yield return new WaitForSeconds(0.1f);
+        }
+        MyMeshVisibility.forceRenderingOff = false;
+        //yield return new WaitForSeconds((InvTime*5)/6);
         DamageState = false;
     }
 }
